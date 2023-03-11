@@ -36,8 +36,20 @@ $callback = function ($ch, $data) {
             setcookie("errcode", "insufficient_quota");
         }
     } else {
-        echo $data;
-        $_SESSION['response'] .= $data;
+        $parts = explode("\n\n", $data);
+        foreach($parts as $v){ 
+            $new_data = str_replace("data: ", "", $v);
+            $obj = json_decode(trim($new_data));
+
+            if(empty($obj)){
+                $data_str = $v . "\n\n";
+            } else {
+                unset($obj->id,$obj->object,$obj->created,$obj->model);
+                $data_str = "data: " . json_encode($obj) . "\n\n";
+            }
+            echo $data_str;
+            $_SESSION['response'] .= $data_str;
+        }
     }
     return strlen($data);
 };
